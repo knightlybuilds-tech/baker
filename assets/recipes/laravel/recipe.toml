@@ -1,0 +1,45 @@
+name = "laravel"
+version = 1
+description = "Laravel application (composer create-project laravel/laravel)"
+
+[install]
+run = "composer create-project laravel/laravel {{.Name}}"
+
+[detect]
+file = "composer.json"
+contains = "laravel/framework"
+
+[[facts]]
+name = "laravel_version"
+file = "composer.json"
+json_path = "require.laravel/framework"
+format = "major"
+
+[[facts]]
+name = "php_version"
+file = "composer.json"
+json_path = "require.php"
+format = "version"
+
+[[facts]]
+name = "test_runner"
+file = "composer.json"
+if_contains = "pestphp/pest"
+then = "Pest"
+else = "PHPUnit"
+
+[[facts]]
+name = "boost"
+file = "composer.json"
+if_contains = "laravel/boost"
+then = "yes"
+else = ""
+
+# Laravel Boost gives agents an MCP server with app-aware tools (routes, schema, logs, docs).
+# Only registered when laravel/boost is installed.
+[[mcp]]
+name = "laravel-boost"
+command = "php"
+args = ["artisan", "boost:mcp"]
+when_file = "composer.json"
+when_contains = "laravel/boost"

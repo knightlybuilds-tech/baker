@@ -1,0 +1,16 @@
+mcp = []
+
+[files]
+'.agents/skills/consolidate/SKILL.md' = 'd7fa1f5226e3c4b6'
+'.agents/skills/ingest/SKILL.md' = '8dc82cafa19624e1'
+'.agents/skills/session-close/SKILL.md' = 'c3499b942d44326a'
+'.claude/skills/consolidate/SKILL.md' = 'd7fa1f5226e3c4b6'
+'.claude/skills/ingest/SKILL.md' = '8dc82cafa19624e1'
+'.claude/skills/session-close/SKILL.md' = 'c3499b942d44326a'
+
+[blocks]
+'.gitignore#baker' = '71a28e7478f1b3d2'
+'AGENTS.md#core' = '76a8f7b20a9072c1'
+'AGENTS.md#recipe:generic' = 'e9744498963b7271'
+'CLAUDE.md#bridge' = '918b1c90559355ef'
+'GEMINI.md#bridge' = '918b1c90559355ef'

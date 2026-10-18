@@ -1,0 +1,9 @@
+/bin/
+*.test
+.DS_Store
+
+# baker:begin baker@1
+memory/hot.md
+.baker/checkpoints/
+.baker/graph/
+# baker:end baker

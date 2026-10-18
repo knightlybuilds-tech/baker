@@ -1,0 +1,8 @@
+# baker project manifest — https://github.com/roguenet/baker
+# Edit agents or mcp here, then run `baker sync`.
+
+standard = '0.1'
+name = 'baker'
+recipe = 'generic'
+recipe_version = 1
+agents = ['claude', 'codex', 'gemini', 'cursor', 'copilot', 'opencode']
