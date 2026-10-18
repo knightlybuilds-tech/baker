@@ -13,8 +13,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/roguenet/baker/internal/blocks"
-	"github.com/roguenet/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/blocks"
+	"github.com/knightlybuilds-tech/baker/internal/config"
 )
 
 type Action string

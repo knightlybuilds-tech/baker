@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/roguenet/baker/internal/agents"
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/continuity"
+	"github.com/knightlybuilds-tech/baker/internal/agents"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/continuity"
 	"github.com/spf13/cobra"
 )
 

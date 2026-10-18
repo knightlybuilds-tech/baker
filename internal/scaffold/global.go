@@ -9,10 +9,10 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/roguenet/baker/internal/agents"
-	"github.com/roguenet/baker/internal/blocks"
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/recipe"
+	"github.com/knightlybuilds-tech/baker/internal/agents"
+	"github.com/knightlybuilds-tech/baker/internal/blocks"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/recipe"
 )
 
 // GlobalInit creates ~/.baker with config, personal AGENTS.md and global memory.

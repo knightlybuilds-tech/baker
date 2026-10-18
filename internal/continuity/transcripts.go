@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/roguenet/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/config"
 )
 
 type Message struct {

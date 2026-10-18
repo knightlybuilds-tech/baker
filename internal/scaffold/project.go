@@ -3,8 +3,8 @@ package scaffold
 import (
 	"path/filepath"
 
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/recipe"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/recipe"
 )
 
 // Prepare loads (or creates) the project manifest for root, resolves the

@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/scaffold"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 

@@ -6,11 +6,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/knightlybuilds-tech/baker/internal/agents"
+	"github.com/knightlybuilds-tech/baker/internal/blocks"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/recipe"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/roguenet/baker/internal/agents"
-	"github.com/roguenet/baker/internal/blocks"
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/recipe"
 )
 
 const (
@@ -275,7 +275,7 @@ func planManifest(p *Plan, proj *config.Project) error {
 	if err != nil {
 		return err
 	}
-	header := "# baker project manifest — https://github.com/roguenet/baker\n# Edit agents or mcp here, then run `baker sync`.\n\n"
+	header := "# baker project manifest — https://github.com/knightlybuilds-tech/baker\n# Edit agents or mcp here, then run `baker sync`.\n\n"
 	cur, exists := p.Read(config.ProjectFile)
 	if exists {
 		var old config.Project

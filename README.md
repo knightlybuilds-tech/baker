@@ -55,13 +55,13 @@ Codex, Cursor, Copilot, OpenCode, Windsurf, Amp, Zed and Cline read `AGENTS.md` 
 baker is a single Go binary.
 
 ```bash
-go install github.com/roguenet/baker/cmd/baker@latest
+go install github.com/knightlybuilds-tech/baker/cmd/baker@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/roguenet/baker && cd baker
+git clone https://github.com/knightlybuilds-tech/baker && cd baker
 make install        # builds and copies baker to $GOPATH/bin
 ```
 

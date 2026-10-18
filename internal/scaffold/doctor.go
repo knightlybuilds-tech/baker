@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/roguenet/baker/internal/agents"
-	"github.com/roguenet/baker/internal/blocks"
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/memory"
+	"github.com/knightlybuilds-tech/baker/internal/agents"
+	"github.com/knightlybuilds-tech/baker/internal/blocks"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/memory"
 )
 
 // Doctor checks a project against the baker standard.

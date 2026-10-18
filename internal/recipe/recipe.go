@@ -23,9 +23,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/knightlybuilds-tech/baker/assets"
+	"github.com/knightlybuilds-tech/baker/internal/config"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/roguenet/baker/assets"
-	"github.com/roguenet/baker/internal/config"
 )
 
 type Recipe struct {

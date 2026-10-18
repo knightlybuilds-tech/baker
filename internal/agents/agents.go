@@ -9,7 +9,7 @@ package agents
 import (
 	"sort"
 
-	"github.com/roguenet/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/config"
 )
 
 // MCPFormat says how a tool's MCP config file is shaped.

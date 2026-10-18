@@ -1,4 +1,4 @@
-module github.com/roguenet/baker
+module github.com/knightlybuilds-tech/baker
 
 go 1.27.2
 

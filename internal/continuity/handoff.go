@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/roguenet/baker/internal/memory"
+	"github.com/knightlybuilds-tech/baker/internal/memory"
 )
 
 // Brief builds the resume prompt from the three layers:

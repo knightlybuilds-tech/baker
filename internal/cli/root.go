@@ -7,13 +7,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/roguenet/baker/internal/config"
-	"github.com/roguenet/baker/internal/memory"
-	"github.com/roguenet/baker/internal/scaffold"
+	"github.com/knightlybuilds-tech/baker/internal/config"
+	"github.com/knightlybuilds-tech/baker/internal/memory"
+	"github.com/knightlybuilds-tech/baker/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
-// Version is set at build time with -ldflags "-X github.com/roguenet/baker/internal/cli.Version=v0.1.0".
+// Version is set at build time with -ldflags "-X github.com/knightlybuilds-tech/baker/internal/cli.Version=v0.1.0".
 var Version = "dev"
 
 func Execute() error {

@@ -1,4 +1,4 @@
-# baker project manifest — https://github.com/roguenet/baker
+# baker project manifest — https://github.com/knightlybuilds-tech/baker
 # Edit agents or mcp here, then run `baker sync`.
 
 standard = '0.1'

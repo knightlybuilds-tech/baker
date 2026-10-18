@@ -1,5 +1,5 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS := -s -w -X github.com/roguenet/baker/internal/cli.Version=$(VERSION)
+LDFLAGS := -s -w -X github.com/knightlybuilds-tech/baker/internal/cli.Version=$(VERSION)
 
 .PHONY: build install test lint clean
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/roguenet/baker/internal/cli"
+	"github.com/knightlybuilds-tech/baker/internal/cli"
 )
 
 func main() {
