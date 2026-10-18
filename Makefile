@@ -8,6 +8,9 @@ build:
 
 install:
 	go install -ldflags "$(LDFLAGS)" ./cmd/baker
+	@bin="$$(go env GOBIN)"; [ -n "$$bin" ] || bin="$$(go env GOPATH)/bin"; \
+	echo "✓ baker installed to $$bin/baker"; \
+	case ":$$PATH:" in *":$$bin:"*) ;; *) echo; "$$bin/baker" --version >/dev/null;; esac
 
 test:
 	go test ./...

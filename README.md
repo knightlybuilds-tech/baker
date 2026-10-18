@@ -62,10 +62,18 @@ Or build from source:
 
 ```bash
 git clone https://github.com/knightlybuilds-tech/baker && cd baker
-make install        # builds and copies baker to $GOPATH/bin
+make install        # builds, copies baker to $GOPATH/bin, and checks your PATH
 ```
 
-Make sure `baker` is on your `PATH`: agent hooks call it to save checkpoints.
+### Put baker on your PATH
+
+`go install` puts binaries in `~/go/bin` (or `$GOBIN`), which often isn't on your `PATH`. Then typing `baker` says "command not found", and agent hooks can't save checkpoints. Add the folder once:
+
+```bash
+echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+```
+
+Use `~/.bashrc` for bash, or `fish_add_path ~/go/bin` for fish. You don't have to remember this: `make install`, and baker itself whenever you run it by its full path (`~/go/bin/baker`), detect the problem and print the right command for your shell. Set `BAKER_NO_PATH_HINT=1` to silence it.
 
 ## Quick start
 
