@@ -166,12 +166,18 @@ func codexSession(dir, root string) (*Session, error) {
 // ParseCodex reads a Codex CLI rollout file.
 func ParseCodex(path string) (*Session, error) {
 	s := &Session{Agent: "codex", File: path}
+	touched := map[string]bool{}
 	err := eachJSONLine(path, func(line map[string]any) {
 		item := line
 		if p, ok := line["payload"].(map[string]any); ok {
 			item = p
 		}
-		if item["type"] != "message" {
+		switch item["type"] {
+		case "function_call", "custom_tool_call":
+			codexToolCall(s, touched, item)
+			return
+		case "message":
+		default:
 			return
 		}
 		role, _ := item["role"].(string)
@@ -195,40 +201,166 @@ func ParseCodex(path string) (*Session, error) {
 		}
 		s.Messages = append(s.Messages, Message{role, text})
 	})
+	s.FilesTouched = sortedKeys(touched)
 	s.Updated = modTime(path)
 	return s, err
 }
 
-// ---- Gemini CLI: <dir>/tmp/<sha256(root)>/chats/session-*.json ----
+var patchFile = regexp.MustCompile(`(?m)^\*\*\* (?:Add|Update|Delete) File: (.+)$`)
+
+// codexToolCall picks up the plan (update_plan) and edited files (apply_patch).
+// apply_patch is a custom tool with the patch as raw input; older versions sent
+// it as a function call with JSON arguments.
+func codexToolCall(s *Session, touched map[string]bool, item map[string]any) {
+	name, _ := item["name"].(string)
+	raw, _ := item["input"].(string)
+	if args, ok := item["arguments"].(string); ok {
+		raw = args
+	}
+	switch name {
+	case "update_plan":
+		var args struct {
+			Plan []struct {
+				Step   string `json:"step"`
+				Status string `json:"status"`
+			} `json:"plan"`
+		}
+		if json.Unmarshal([]byte(raw), &args) == nil {
+			s.Todos = nil
+			for _, p := range args.Plan {
+				s.Todos = append(s.Todos, Todo{Content: p.Step, Status: p.Status})
+			}
+		}
+	case "apply_patch":
+		var args struct {
+			Input string `json:"input"`
+		}
+		if json.Unmarshal([]byte(raw), &args) == nil && args.Input != "" {
+			raw = args.Input
+		}
+		for _, m := range patchFile.FindAllStringSubmatch(raw, -1) {
+			touched[strings.TrimSpace(m[1])] = true
+		}
+	}
+}
+
+// ---- Gemini CLI: <dir>/tmp/<project-id>/chats/session-*.jsonl ----
+//
+// Current versions name the project dir with a short slug recorded in
+// <dir>/projects.json and in <dir>/tmp/<slug>/.project_root. Older versions
+// used sha256(root) and wrote one session-*.json document per chat.
 
 func geminiSession(dir, root string) (*Session, error) {
-	sum := sha256.Sum256([]byte(root))
-	files := newestFiles(filepath.Join(dir, "tmp", hex.EncodeToString(sum[:]), "chats"), ".json", 1)
+	var files []string
+	for _, d := range geminiProjectDirs(dir, root) {
+		for _, f := range newestFiles(filepath.Join(d, "chats"), "", 50) {
+			// Subagent chats live in subdirectories and aren't named session-*.
+			base := filepath.Base(f)
+			if strings.HasPrefix(base, "session-") && (strings.HasSuffix(base, ".jsonl") || strings.HasSuffix(base, ".json")) {
+				files = append(files, f)
+			}
+		}
+	}
 	if len(files) == 0 {
 		return nil, nil
 	}
+	sort.Slice(files, func(i, j int) bool { return modTime(files[i]).After(modTime(files[j])) })
 	return ParseGemini(files[0])
 }
 
-// ParseGemini reads a Gemini CLI saved chat.
+// geminiProjectDirs lists the temp dirs Gemini may have used for root.
+func geminiProjectDirs(dir, root string) []string {
+	tmp := filepath.Join(dir, "tmp")
+	seen := map[string]bool{}
+	var out []string
+	add := func(name string) {
+		if name != "" && !seen[name] {
+			seen[name] = true
+			out = append(out, filepath.Join(tmp, name))
+		}
+	}
+	var reg struct {
+		Projects map[string]string `json:"projects"`
+	}
+	if b, err := os.ReadFile(filepath.Join(dir, "projects.json")); err == nil && json.Unmarshal(b, &reg) == nil {
+		add(reg.Projects[root])
+	}
+	entries, _ := os.ReadDir(tmp)
+	for _, e := range entries {
+		if b, err := os.ReadFile(filepath.Join(tmp, e.Name(), ".project_root")); err == nil && strings.TrimSpace(string(b)) == root {
+			add(e.Name())
+		}
+	}
+	sum := sha256.Sum256([]byte(root))
+	add(hex.EncodeToString(sum[:]))
+	return out
+}
+
+type geminiMessage struct {
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	Content any    `json:"content"`
+}
+
+// ParseGemini reads a Gemini CLI chat: the current JSONL log (a metadata line,
+// message records, and $set / $rewindTo updates; $patch edits are ignored) or
+// a legacy JSON document.
 func ParseGemini(path string) (*Session, error) {
 	s := &Session{Agent: "gemini", File: path, Updated: modTime(path)}
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+	var msgs []geminiMessage
+	if strings.HasSuffix(path, ".json") {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		var doc struct {
+			Messages []geminiMessage `json:"messages"`
+		}
+		if err := json.Unmarshal(b, &doc); err != nil {
+			return nil, err
+		}
+		msgs = doc.Messages
+	} else {
+		err := eachJSONLine(path, func(line map[string]any) {
+			if set, ok := line["$set"].(map[string]any); ok {
+				if list, ok := set["messages"].([]any); ok {
+					msgs = nil
+					for _, m := range list {
+						msgs = append(msgs, toGeminiMessage(m))
+					}
+				}
+				return
+			}
+			if id, ok := line["$rewindTo"].(string); ok {
+				for i, m := range msgs {
+					if m.ID == id {
+						msgs = msgs[:i]
+						break
+					}
+				}
+				return
+			}
+			if _, ok := line["type"]; ok {
+				m := toGeminiMessage(line)
+				// A record with a known id replaces the earlier version.
+				for i := range msgs {
+					if m.ID != "" && msgs[i].ID == m.ID {
+						msgs[i] = m
+						return
+					}
+				}
+				msgs = append(msgs, m)
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
-	var doc struct {
-		Messages []struct {
-			Type    string `json:"type"`
-			Content any    `json:"content"`
-		} `json:"messages"`
-	}
-	if err := json.Unmarshal(b, &doc); err != nil {
-		return nil, err
-	}
-	for _, m := range doc.Messages {
-		text, _ := m.Content.(string)
-		text = strings.TrimSpace(text)
+	for _, m := range msgs {
+		if m.Type != "user" && m.Type != "gemini" {
+			continue // info, error, warning
+		}
+		text := strings.TrimSpace(geminiText(m.Content))
 		if text == "" {
 			continue
 		}
@@ -239,6 +371,33 @@ func ParseGemini(path string) (*Session, error) {
 		s.Messages = append(s.Messages, Message{role, text})
 	}
 	return s, nil
+}
+
+func toGeminiMessage(v any) geminiMessage {
+	var m geminiMessage
+	b, _ := json.Marshal(v)
+	_ = json.Unmarshal(b, &m)
+	return m
+}
+
+// geminiText flattens a PartListUnion: a string, a part, or a list of either.
+func geminiText(v any) string {
+	switch c := v.(type) {
+	case string:
+		return c
+	case map[string]any:
+		t, _ := c["text"].(string)
+		return t
+	case []any:
+		var parts []string
+		for _, p := range c {
+			if t := geminiText(p); t != "" {
+				parts = append(parts, t)
+			}
+		}
+		return strings.Join(parts, "\n")
+	}
+	return ""
 }
 
 // ---- helpers ----

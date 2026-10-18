@@ -20,14 +20,16 @@ func checkpointCmd() *cobra.Command {
 	var agent string
 	var quiet bool
 	cmd := &cobra.Command{
-		Use:   "checkpoint",
+		Use:   "checkpoint [hook-payload]",
+		Args:  cobra.ArbitraryArgs,
 		Short: "Snapshot git state and the latest transcript (run by agent hooks)",
 		Long: `Saves a mechanical snapshot to .baker/checkpoints/: branch, uncommitted
 changes, and the tail of the latest agent transcript. No LLM, no network.
 Agent hooks call this after every turn; with --quiet it never fails, so it
-can't break your agent.`,
+can't break your agent. Hook input is read as JSON from stdin (Claude Code,
+Gemini CLI) or from the first argument (Codex notify).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := runCheckpoint(agent, quiet)
+			err := runCheckpoint(agent, quiet, args)
 			if quiet {
 				return nil
 			}
@@ -39,14 +41,17 @@ can't break your agent.`,
 	return cmd
 }
 
-func runCheckpoint(agent string, quiet bool) error {
+func runCheckpoint(agent string, quiet bool, args []string) error {
 	var hook *continuity.HookInput
-	if info, err := os.Stdin.Stat(); err == nil && info.Mode()&os.ModeCharDevice == 0 {
-		b, _ := io.ReadAll(io.LimitReader(os.Stdin, 1<<20))
-		var h continuity.HookInput
-		if json.Unmarshal(b, &h) == nil {
-			hook = &h
-		}
+	var payload []byte
+	if len(args) > 0 {
+		payload = []byte(args[0])
+	} else if info, err := os.Stdin.Stat(); err == nil && info.Mode()&os.ModeCharDevice == 0 {
+		payload, _ = io.ReadAll(io.LimitReader(os.Stdin, 1<<20))
+	}
+	var h continuity.HookInput
+	if len(payload) > 0 && json.Unmarshal(payload, &h) == nil {
+		hook = &h
 	}
 	wd, _ := os.Getwd()
 	if hook != nil && hook.Cwd != "" {

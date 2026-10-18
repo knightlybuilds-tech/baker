@@ -9,7 +9,7 @@ Status: design document for standard v0.1. Core decisions locked (section 6).
 > - `baker graph` (graphify adapter, section 3.5) is designed but **not implemented yet**.
 > - Remote recipes (`--recipe github:user/repo`) are **not implemented yet**.
 > - Recipe facts use a `[[facts]]` array — see [recipes.md](recipes.md) for the real format.
-> - Gemini CLI checkpoint hooks are not wired yet; Claude Code (Stop/PreCompact) and Codex (`notify`) are.
+> - Checkpoint hooks: Claude Code (Stop/PreCompact), Gemini CLI (AfterAgent/PreCompress) and Codex (`notify` in `~/.codex/config.toml`). Current paths and formats are in [agents.md](agents.md).
 
 ---
 
@@ -296,11 +296,11 @@ Agents forget instructions; hooks don't. `baker init` installs a tiny hook in ev
 | Agent | Hook used |
 |---|---|
 | Claude Code | `Stop` and `PreCompact` hooks in `.claude/settings.json` |
-| Codex | `notify` command in config |
-| Gemini CLI | hooks in `.gemini/settings.json` |
+| Codex | `notify` command in `~/.codex/config.toml` |
+| Gemini CLI | `AfterAgent` and `PreCompress` hooks in `.gemini/settings.json` |
 | Others | none yet — layers 1 and 3 still work |
 
-*(Hook names and config paths to be verified per tool before v1.)*
+*(Verified October 2026; see [agents.md](agents.md).)*
 
 `baker checkpoint` is mechanical and fast (no LLM, under 100 ms). It saves to `.baker/checkpoints/<timestamp>.json`:
 - branch, last commit, `git status`, diff stats of uncommitted changes
@@ -314,11 +314,11 @@ Only the newest 20 are kept.
 
 Every major CLI agent already saves full transcripts locally. `baker handoff` knows where each one keeps them, finds the latest session **for this project folder**, and pulls out what matters:
 
-| Agent | Transcript location (to verify) |
+| Agent | Transcript location |
 |---|---|
 | Claude Code | `~/.claude/projects/<folder-slug>/*.jsonl` (or `$CLAUDE_CONFIG_DIR/projects/…` per account) |
 | Codex | `~/.codex/sessions/YYYY/MM/DD/*.jsonl` |
-| Gemini CLI | `~/.gemini/tmp/<project-hash>/` |
+| Gemini CLI | `~/.gemini/tmp/<project-id>/chats/session-*.jsonl` |
 | OpenCode | its local storage dir |
 
 **Switching accounts on the same provider** often means a different config dir (for example a second `CLAUDE_CONFIG_DIR`). List them all in `~/.baker/config.toml` and baker searches every one:

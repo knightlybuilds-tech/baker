@@ -1,10 +1,13 @@
 package scaffold
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 func bake(t *testing.T, root string, force bool) *Plan {
@@ -86,5 +89,52 @@ func TestInitAdoptsExistingClaudeMD(t *testing.T) {
 	}
 	if strings.Contains(readFile(t, root, "CLAUDE.md"), "Always use Pest.") {
 		t.Error("CLAUDE.md still holds the old content (would load twice)")
+	}
+}
+
+func TestGeminiCheckpointHookMergesSettings(t *testing.T) {
+	t.Setenv("BAKER_HOME", t.TempDir())
+	t.Setenv("BAKER_USER_HOME", t.TempDir())
+	root := t.TempDir()
+	_ = os.MkdirAll(filepath.Join(root, ".gemini"), 0o755)
+	_ = os.WriteFile(filepath.Join(root, ".gemini/settings.json"), []byte(`{"theme": "Dracula"}`), 0o644)
+
+	bake(t, root, false)
+	var doc struct {
+		Theme string `json:"theme"`
+		Hooks map[string][]struct {
+			Hooks []struct{ Type, Command string } `json:"hooks"`
+		} `json:"hooks"`
+	}
+	if err := json.Unmarshal([]byte(readFile(t, root, ".gemini/settings.json")), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc.Theme != "Dracula" {
+		t.Error("user settings were dropped")
+	}
+	for _, event := range []string{"AfterAgent", "PreCompress"} {
+		list := doc.Hooks[event]
+		if len(list) != 1 || len(list[0].Hooks) != 1 || !strings.Contains(list[0].Hooks[0].Command, "baker checkpoint --agent gemini --quiet") {
+			t.Errorf("%s hook: %+v", event, list)
+		}
+	}
+	if strings.Contains(readFile(t, root, ".claude/settings.json"), "--agent gemini") {
+		t.Error("Claude hook should name claude")
+	}
+
+	// A second build doesn't add the hook twice.
+	bake(t, root, false)
+	if n := strings.Count(readFile(t, root, ".gemini/settings.json"), "baker checkpoint"); n != 2 {
+		t.Errorf("want 2 hooks after rebuild, got %d", n)
+	}
+}
+
+func TestCodexNotifyHookIsValidTOML(t *testing.T) {
+	var doc struct{ Notify []string }
+	if err := toml.Unmarshal([]byte(codexHook), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if len(doc.Notify) != 3 || doc.Notify[0] != "sh" || !strings.Contains(doc.Notify[2], `--quiet "$0"`) {
+		t.Fatalf("notify: %q", doc.Notify)
 	}
 }

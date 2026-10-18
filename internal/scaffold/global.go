@@ -36,7 +36,9 @@ func GlobalInit() (*Plan, error) {
 
 var htmlComment = regexp.MustCompile(`(?s)<!--.*?-->`)
 
-const codexHook = `notify = ["sh", "-c", "command -v baker >/dev/null 2>&1 && baker checkpoint --agent codex --quiet || true"]`
+// Codex appends the turn's JSON payload (with cwd) as the last argument; under
+// sh -c it lands in $0, which baker reads to find the project.
+const codexHook = `notify = ["sh", "-c", "command -v baker >/dev/null 2>&1 && baker checkpoint --agent codex --quiet \"$0\" || true"]`
 
 // GlobalSync pushes ~/.baker/AGENTS.md and ~/.baker/skills into each
 // installed agent's user-level files. Plan root is the user's home dir.
@@ -73,12 +75,13 @@ func GlobalSync(force bool) (*Plan, error) {
 		}
 	}
 
-	// Codex has no per-turn hook; its `notify` program runs after each turn.
+	// Codex runs its `notify` program after each turn. It only honours notify in
+	// ~/.codex/config.toml; project config ignores it.
 	if _, err := os.Stat(filepath.Join(home, ".codex")); err == nil && contains(g.Agents, "codex") {
 		cur, _ := p.Read(".codex/config.toml")
 		user := blocks.Strip(cur, blocks.Hash)
 		if !regexp.MustCompile(`(?m)^notify\s*=`).MatchString(user) {
-			p.Block(".codex/config.toml", "checkpoint", "1", codexHook, "", blocks.Prepend)
+			p.Block(".codex/config.toml", "checkpoint", "2", codexHook, "", blocks.Prepend)
 		} else {
 			p.Warnings = append(p.Warnings, "~/.codex/config.toml already has a notify command; add `baker checkpoint --agent codex --quiet` to it yourself for automatic checkpoints")
 		}

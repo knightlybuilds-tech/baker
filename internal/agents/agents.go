@@ -2,8 +2,8 @@
 // bridge it to AGENTS.md, where its MCP config and user-level instructions
 // live, how to launch it, and where it keeps transcripts.
 //
-// Paths marked "verify" in docs/agents.md come from vendor docs as of
-// October 2026 and should be re-checked when a tool changes.
+// Paths were checked against vendor docs and source in October 2026; anything
+// still marked "verify" in docs/agents.md is unconfirmed. Re-check when a tool changes.
 package agents
 
 import (
@@ -45,6 +45,11 @@ type Agent struct {
 	// GlobalSkillsDir: user-level skills dir, relative to the user's home.
 	GlobalSkillsDir string
 
+	// HooksFile: JSON settings file that gets a `baker checkpoint` command hook
+	// on each of HookEvents ({"hooks": {event: [{"hooks": [{type, command}]}]}}).
+	HooksFile  string
+	HookEvents []string
+
 	// Launch builds the command line that starts the tool with a first prompt.
 	Launch func(prompt string) []string
 }
@@ -56,9 +61,12 @@ var all = []Agent{
 		SkillsDir: ".claude/skills",
 		MCPFile:   ".mcp.json", MCPFormat: MCPServers,
 		GlobalFile: ".claude/CLAUDE.md", GlobalSkillsDir: ".claude/skills",
+		HooksFile: ".claude/settings.json", HookEvents: []string{"Stop", "PreCompact"},
 		Launch: func(p string) []string { return []string{"claude", p} },
 	},
 	{
+		// Project .codex/config.toml loads only once the project is trusted.
+		// The checkpoint hook is `notify` in ~/.codex/config.toml (global sync).
 		ID: "codex", Name: "OpenAI Codex", ReadsAgentsMD: true,
 		MCPFile: ".codex/config.toml", MCPFormat: MCPCodexTOML,
 		GlobalFile: ".codex/AGENTS.md",
@@ -69,7 +77,9 @@ var all = []Agent{
 		BridgeFile: "GEMINI.md", BridgeContent: "@AGENTS.md",
 		MCPFile: ".gemini/settings.json", MCPFormat: MCPServers,
 		GlobalFile: ".gemini/GEMINI.md",
-		Launch:     func(p string) []string { return []string{"gemini", "-i", p} },
+		// AfterAgent fires after every turn; PreCompress before history is compressed.
+		HooksFile: ".gemini/settings.json", HookEvents: []string{"AfterAgent", "PreCompress"},
+		Launch: func(p string) []string { return []string{"gemini", "-i", p} },
 	},
 	{
 		ID: "cursor", Name: "Cursor", ReadsAgentsMD: true,
@@ -86,6 +96,7 @@ var all = []Agent{
 		Launch:     func(p string) []string { return []string{"opencode", "--prompt", p} },
 	},
 	{
+		// Aider (0.86) doesn't read AGENTS.md on its own; `read:` loads it every session.
 		ID: "aider", Name: "Aider",
 		BridgeFile: ".aider.conf.yml", BridgeContent: "read: AGENTS.md",
 		Launch: func(p string) []string { return []string{"aider", "--message", p} },

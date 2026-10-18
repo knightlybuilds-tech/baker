@@ -76,10 +76,17 @@ func Doctor(root string) []memory.Finding {
 		}
 	}
 
-	if proj.HasAgent("claude") {
-		if c, ok := read(".claude/settings.json"); !ok || !strings.Contains(c, "baker checkpoint") {
-			add(memory.Warn, "Claude Code checkpoint hook not installed — run `baker sync`")
+	hooked := false
+	for _, a := range agents.For(proj) {
+		if a.HooksFile == "" {
+			continue
 		}
+		hooked = true
+		if c, ok := read(a.HooksFile); !ok || !strings.Contains(c, "baker checkpoint") {
+			add(memory.Warn, "%s checkpoint hook not installed — run `baker sync`", a.Name)
+		}
+	}
+	if hooked {
 		if _, err := exec.LookPath("baker"); err != nil {
 			add(memory.Warn, "`baker` is not on your PATH, so agent hooks can't take checkpoints")
 		}

@@ -35,6 +35,7 @@ shop/
 ├── .agents/skills/        ← session-close, consolidate, ingest + stack skills
 ├── .claude/skills/        ← mirror for Claude Code        (generated)
 ├── .claude/settings.json  ← checkpoint hook               (generated)
+├── .gemini/settings.json  ← checkpoint hook + MCP         (generated)
 ├── .mcp.json …            ← MCP servers for every agent   (generated)
 ├── memory/
 │   ├── MEMORY.md          ← index: one line per note
@@ -150,15 +151,15 @@ Override any recipe by putting your own in `~/.baker/recipes/<name>/`. → [docs
 | Agent | Reads AGENTS.md via | MCP file | Checkpoint hook | Transcript recovery |
 |---|---|---|---|---|
 | Claude Code | `CLAUDE.md` → `@AGENTS.md` | `.mcp.json` | ✅ Stop + PreCompact | ✅ |
-| Codex | native | `.codex/config.toml` | ✅ `notify` (global sync) | ✅ |
-| Gemini CLI | `GEMINI.md` → `@AGENTS.md` | `.gemini/settings.json` | — | ✅ (best effort) |
+| Codex | native | `.codex/config.toml` (trusted projects) | ✅ `notify` (global sync) | ✅ |
+| Gemini CLI | `GEMINI.md` → `@AGENTS.md` | `.gemini/settings.json` | ✅ AfterAgent + PreCompress | ✅ |
 | Cursor | native | `.cursor/mcp.json` | — | — |
 | GitHub Copilot | native | `.vscode/mcp.json` | — | — |
 | OpenCode | native | `opencode.json` | — | — |
 | Aider | `.aider.conf.yml` → `read: AGENTS.md` | — | — | — |
 | Windsurf, Amp, Zed, Cline | native | — | — | — |
 
-Details and file paths to re-verify: [docs/agents.md](docs/agents.md)
+Details, file paths and what's still unverified: [docs/agents.md](docs/agents.md)
 
 ## Principles
 
@@ -176,7 +177,6 @@ The full design is in [docs/spec.md](docs/spec.md), and the research behind it i
 - [ ] `baker graph`: optional [graphify](https://github.com/safishamsi/graphify) code-graph adapter (designed in the spec)
 - [ ] Remote recipes: `--recipe github:user/repo`
 - [ ] More recipes: Next.js, Django, Rails, Go
-- [ ] Gemini CLI checkpoint hook
 - [ ] Homebrew tap and prebuilt release binaries
 - [ ] Organization profiles for the vault (PARA, Johnny Decimal)
 

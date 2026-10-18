@@ -34,7 +34,8 @@ type Checkpoint struct {
 	Session *Session  `json:"session,omitempty"`
 }
 
-// HookInput is the JSON some agents (Claude Code) pass to hooks on stdin.
+// HookInput is the JSON agents pass to hooks: on stdin for Claude Code and
+// Gemini CLI, as the last argument for Codex's notify (which has only cwd).
 type HookInput struct {
 	TranscriptPath string `json:"transcript_path"`
 	Cwd            string `json:"cwd"`
@@ -44,8 +45,13 @@ type HookInput struct {
 func Take(root, agent string, hook *HookInput) (*Checkpoint, string, error) {
 	cp := &Checkpoint{Time: time.Now(), Agent: agent, Git: Git(root)}
 	var s *Session
-	if hook != nil && hook.TranscriptPath != "" && agent == "claude" {
-		s, _ = ParseClaude(hook.TranscriptPath)
+	if hook != nil && hook.TranscriptPath != "" {
+		switch agent {
+		case "claude":
+			s, _ = ParseClaude(hook.TranscriptPath)
+		case "gemini":
+			s, _ = ParseGemini(hook.TranscriptPath)
+		}
 	}
 	if s == nil {
 		s, _ = LatestSession(root, agent)

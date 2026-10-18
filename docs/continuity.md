@@ -40,7 +40,8 @@ The core block in `AGENTS.md` tells every agent to update it after each finished
 `baker init` / `sync` install a hook so that `baker checkpoint` runs after every turn:
 
 - **Claude Code:** `Stop` and `PreCompact` hooks in `.claude/settings.json`. Claude passes the transcript path on stdin.
-- **Codex:** `baker global sync` adds a `notify` program to `~/.codex/config.toml`, but only if you don't already have one.
+- **Gemini CLI:** `AfterAgent` and `PreCompress` hooks in `.gemini/settings.json`. Gemini passes the transcript path on stdin, and asks you to approve a project hook before it first runs.
+- **Codex:** `baker global sync` adds a `notify` program to `~/.codex/config.toml`, but only if you don't already have one. Codex passes the turn's `cwd` as a JSON argument, so the checkpoint lands in the right project. (Codex ignores `notify` in project config.)
 
 A checkpoint is mechanical: branch, last commit, `git status`, diff stats, the agent's todo list, and the last 8 messages (redacted, truncated). The newest 20 are kept in `.baker/checkpoints/` (gitignored). With `--quiet`, the command never prints and always exits 0, so a hook can never break your agent. Outside a baker project it does nothing.
 
@@ -51,8 +52,8 @@ Agents already keep full transcripts locally. baker finds the newest one for the
 | Agent | Location | Match |
 |---|---|---|
 | Claude Code | `<config>/projects/<path-with-dashes>/*.jsonl` | folder name, falls back to the `cwd` field |
-| Codex | `<config>/sessions/YYYY/MM/DD/*.jsonl` | `cwd` in the session metadata |
-| Gemini CLI | `<config>/tmp/<sha256(path)>/chats/*.json` | path hash (best effort; format unverified) |
+| Codex | `<config>/sessions/YYYY/MM/DD/rollout-*.jsonl` | `cwd` in the session metadata; plan (`update_plan`) and files (`apply_patch`) are picked up too |
+| Gemini CLI | `<config>/tmp/<project-id>/chats/session-*.jsonl` | `<project-id>` from `<config>/projects.json` or the `.project_root` marker; older versions used `sha256(path)` and `.json` files, which still work |
 
 **Several accounts?** Each account usually has its own config dir (for example a second `CLAUDE_CONFIG_DIR`). List them all in `~/.baker/config.toml`:
 
