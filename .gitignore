@@ -2,6 +2,9 @@
 *.test
 .DS_Store
 
+# Website for getbaker.sh / getbaker.app — local only for now
+/website/
+
 # baker:begin baker@1
 memory/hot.md
 .baker/checkpoints/

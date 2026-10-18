@@ -9,6 +9,7 @@ The design lives in `docs/spec.md`; the research behind it in `docs/research/`.
 - Test: `make test` (`go test ./...`)
 - Lint / format: `make lint` (go vet + gofmt check); fix formatting with `gofmt -w .`
 - Try it safely: set `BAKER_HOME` and `BAKER_USER_HOME` to temp dirs so you never touch the real `~/.baker` or `~/.claude`.
+- Website: `cd website && npm run dev` (Astro, http://localhost:4321). `website/` is gitignored for now; its docs pages render `docs/*.md` directly, so edit docs there. See `website/README.md`.
 
 ## Conventions
 - **Document as you build:** any new command, flag, file layout or recipe change updates `README.md` and the matching `docs/*.md` in the same change.
