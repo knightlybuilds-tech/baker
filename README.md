@@ -52,7 +52,9 @@ Codex, Cursor, Copilot, OpenCode, Windsurf, Amp, Zed and Cline read `AGENTS.md` 
 
 ## Install
 
-baker is a single Go binary.
+baker is a single Go binary. Download it for your OS from
+[Releases](https://github.com/knightlybuilds-tech/baker/releases) (Linux, macOS,
+Windows; amd64 and arm64), unpack it, and put `baker` on your PATH. Or with Go:
 
 ```bash
 go install github.com/knightlybuilds-tech/baker/cmd/baker@latest
@@ -221,7 +223,8 @@ The full design is in [docs/spec.md](docs/spec.md), and the research behind it i
 - [ ] `baker graph`: optional [graphify](https://github.com/safishamsi/graphify) code-graph adapter (designed in the spec)
 - [ ] Remote recipes: `--recipe github:user/repo`
 - [ ] More recipes: Next.js, Django, Rails, Go
-- [ ] Homebrew tap and prebuilt release binaries
+- [x] Prebuilt release binaries
+- [ ] Homebrew tap
 - [ ] Organization profiles for the vault (PARA, Johnny Decimal)
 
 ## Development
@@ -235,6 +238,14 @@ make bakery-ui  # sync the Bakery UI from ../bakery-workspace/dist into internal
 
 Code map: `cmd/baker` (entry) · `internal/cli` (commands) · `internal/scaffold` (plan/apply engine, build, doctor, global) · `internal/blocks` (managed regions) · `internal/recipe` · `internal/memory` (note checks) · `internal/bakery` (local Bakery server + embedded UI) · `internal/continuity` (transcripts, checkpoints, handoff) · `internal/agents` (agent registry) · `assets/` (embedded core block, skills, recipes).
 
+## Releases
+
+Every merge to `main` runs the tests and publishes a release with binaries and
+checksums ([release.yml](.github/workflows/release.yml), [GoReleaser](.goreleaser.yaml)).
+The version is the next patch by default. Put `#minor` or `#major` in the merge
+commit message to bump further, or `#skip-release` to skip. The first release
+is `v0.1.0`.
+
 ## License
 
-To be decided before the first public release.
+[MIT](LICENSE)

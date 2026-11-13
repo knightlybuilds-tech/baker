@@ -1,0 +1,85 @@
+name: release
+
+# Every merge to main publishes a release:
+#   default        next patch      v0.1.3 -> v0.1.4
+#   "#minor"       next minor      v0.1.3 -> v0.2.0
+#   "#major"       next major      v0.1.3 -> v1.0.0
+#   "#skip-release" no release
+# put the marker anywhere in the merge commit message. The first release is v0.1.0.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide the version
+        id: version
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          if [[ "$MSG" == *"#skip-release"* ]]; then
+            echo "Skipping: #skip-release in commit message."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if git tag --points-at HEAD | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Skipping: HEAD is already released."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          last=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          if [[ -z "$last" ]]; then
+            next=v0.1.0
+          else
+            IFS=. read -r major minor patch <<<"${last#v}"
+            if [[ "$MSG" == *"#major"* ]]; then next="v$((major + 1)).0.0"
+            elif [[ "$MSG" == *"#minor"* ]]; then next="v${major}.$((minor + 1)).0"
+            else next="v${major}.${minor}.$((patch + 1))"; fi
+          fi
+          echo "Last: ${last:-none} -> next: $next"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "tag=$next" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        if: steps.version.outputs.skip == 'false'
+        with:
+          go-version-file: go.mod
+
+      - name: Check before publishing
+        if: steps.version.outputs.skip == 'false'
+        run: |
+          test -f LICENSE || { echo "::error::No LICENSE file; refusing to publish."; exit 1; }
+          go vet ./...
+          test -z "$(gofmt -l .)" || { echo "::error::gofmt needed"; gofmt -l .; exit 1; }
+          go test ./...
+
+      - name: Tag
+        if: steps.version.outputs.skip == 'false'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - uses: goreleaser/goreleaser-action@v6
+        if: steps.version.outputs.skip == 'false'
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
