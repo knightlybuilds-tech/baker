@@ -71,6 +71,29 @@ func Notes(dir string) []Note {
 	return out
 }
 
+// Links returns the slugs a note body links to, via [[slug]] or relative
+// Markdown links to .md files, in order of first appearance.
+func Links(body string) []string {
+	seen := map[string]bool{}
+	out := []string{}
+	add := func(slug string) {
+		slug = strings.TrimSpace(slug)
+		if slug != "" && !seen[slug] {
+			seen[slug] = true
+			out = append(out, slug)
+		}
+	}
+	for _, m := range wikiLink.FindAllStringSubmatch(body, -1) {
+		add(m[1])
+	}
+	for _, m := range mdLink.FindAllStringSubmatch(body, -1) {
+		if !strings.Contains(m[1], "://") {
+			add(strings.TrimSuffix(filepath.Base(m[1]), ".md"))
+		}
+	}
+	return out
+}
+
 // ParseFrontmatter splits simple `key: value` YAML frontmatter from the body.
 func ParseFrontmatter(s string) (map[string]string, string) {
 	fm := map[string]string{}

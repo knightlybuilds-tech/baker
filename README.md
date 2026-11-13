@@ -101,6 +101,7 @@ Existing `CLAUDE.md` / `GEMINI.md` instructions are moved into `AGENTS.md`, neve
 | `baker sync` | Regenerate bridges, skills, MCP config, hooks and managed blocks. Your edits are protected (`--force` overrides, `--dry-run` previews) |
 | `baker doctor` | Check bridges, file sizes, legacy files, hooks and memory health |
 | `baker memory list / recall / check` | Discover, retrieve, and check ordinary local notes without an account or approval |
+| `baker bakery` | Browse this project's memory as cards, a list and a connected web on `127.0.0.1` (read-only, live-updating) |
 | `baker checkpoint` | Snapshot git state + latest transcript (run automatically by hooks) |
 | `baker handoff` | Print a resume brief (`--copy` to clipboard, `-o file`) |
 | `baker resume <agent>` | Launch another agent with the resume brief as its first prompt |
@@ -146,6 +147,21 @@ Team-first means project knowledge is portable and safe to commit, while
 personal handoffs and checkpoints remain local. Bakery will add collaboration;
 it is not required for local capture, retention, retrieval, or continuation.
 See [the standalone scope](docs/implementation-plan.md).
+
+### See your memory: `baker bakery`
+
+```bash
+baker bakery            # opens http://127.0.0.1:4410/
+baker bakery --no-open --port 4500
+```
+
+A local, read-only Bakery view of `memory/`: cards, a list and a connected web
+built from your `[[links]]`, with `baker memory check` findings at the top and
+freshness flags on each note. It refreshes within a few seconds of a note
+changing. It binds to loopback only, never writes files, and doesn't show
+`hot.md`, checkpoints or transcripts. Review, branch and team screens belong to
+the future hosted Bakery and are marked as not yet available. See
+[docs/bakery.md](docs/bakery.md).
 
 The earlier review-lifecycle prototype is retained under `baker experimental
 crumb`; it is not part of the default memory workflow. Its evaluations and
@@ -213,9 +229,10 @@ The full design is in [docs/spec.md](docs/spec.md), and the research behind it i
 make test     # go test ./...
 make build    # ./bin/baker
 make lint     # go vet + gofmt check
+make bakery-ui  # sync the Bakery UI from ../bakery-workspace/dist into internal/bakery/ui
 ```
 
-Code map: `cmd/baker` (entry) · `internal/cli` (commands) · `internal/scaffold` (plan/apply engine, build, doctor, global) · `internal/blocks` (managed regions) · `internal/recipe` · `internal/memory` (note checks) · `internal/continuity` (transcripts, checkpoints, handoff) · `internal/agents` (agent registry) · `assets/` (embedded core block, skills, recipes).
+Code map: `cmd/baker` (entry) · `internal/cli` (commands) · `internal/scaffold` (plan/apply engine, build, doctor, global) · `internal/blocks` (managed regions) · `internal/recipe` · `internal/memory` (note checks) · `internal/bakery` (local Bakery server + embedded UI) · `internal/continuity` (transcripts, checkpoints, handoff) · `internal/agents` (agent registry) · `assets/` (embedded core block, skills, recipes).
 
 ## License
 

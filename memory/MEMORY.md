@@ -8,6 +8,7 @@
 - [AGENTS.md is the single source of instructions](decisions/agents-md-is-the-single-source.md) — bridges import it; no symlinks
 - [baker is a single Go binary](decisions/baker-is-a-single-go-binary.md) — no runtime, instant start for hooks
 - [Project memory is committed, except hot.md](decisions/project-memory-is-committed-except-hot-md.md) — daily log files avoid conflicts
+- [Local Bakery is a read-only view served by baker](decisions/bakery-local-is-a-read-only-view-served-by-baker.md) — loopback only, files stay canonical
 
 ## Lessons
 - [Legacy rules files hide AGENTS.md from some tools](lessons/legacy-rules-files-hide-agents-md.md) — Zed reads .cursorrules etc. first
