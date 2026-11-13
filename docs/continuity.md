@@ -1,5 +1,12 @@
 # Continuity
 
+Checkpoint filenames include nanoseconds so rapid turns do not overwrite one
+another. `--from` also restricts checkpoint fallback to the selected agent.
+Local checkpoints and briefs are not automatically uploaded by Baker; supplying
+a brief to a hosted agent sends its contents to that provider. Redaction is best
+effort. Recovery layers are complementary and may omit context; validate the
+current repository before continuing.
+
 Keep working when a session ends: usage limits, switching accounts, or moving from one provider to another.
 
 ## The problem

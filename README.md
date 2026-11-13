@@ -100,6 +100,7 @@ Existing `CLAUDE.md` / `GEMINI.md` instructions are moved into `AGENTS.md`, neve
 | `baker init` | Add the AI layer to the current project (plan → confirm → apply) |
 | `baker sync` | Regenerate bridges, skills, MCP config, hooks and managed blocks. Your edits are protected (`--force` overrides, `--dry-run` previews) |
 | `baker doctor` | Check bridges, file sizes, legacy files, hooks and memory health |
+| `baker memory list / recall / check` | Discover, retrieve, and check ordinary local notes without an account or approval |
 | `baker checkpoint` | Snapshot git state + latest transcript (run automatically by hooks) |
 | `baker handoff` | Print a resume brief (`--copy` to clipboard, `-o file`) |
 | `baker resume <agent>` | Launch another agent with the resume brief as its first prompt |
@@ -118,19 +119,37 @@ You're halfway through a task and Claude hits its usage limit:
 baker resume codex
 ```
 
-Codex starts with a brief built from three layers. Any one of them is enough to continue:
+Codex starts with a brief built from three complementary recovery layers:
 
 1. **`memory/hot.md`**, written by the agent after every finished step (Goal, Done, Next, Gotchas).
 2. **Checkpoints**, saved by a hook after every agent turn: branch, uncommitted changes, todo list, last messages.
 3. **Transcript recovery**: baker reads the previous agent's local transcript (Claude Code, Codex, Gemini CLI), including from other accounts' config folders.
 
-Everything stays on your machine, and secrets are redacted. → [docs/continuity.md](docs/continuity.md)
+Baker builds the brief locally and applies best-effort secret redaction. Passing
+it to a hosted agent sends its contents to that provider. → [docs/continuity.md](docs/continuity.md)
 
 ## Memory: small notes, not a giant file
 
 Memory is **atomic notes**: one idea per file, the title is the claim, under 200 words, linked with `[[wikilinks]]`, indexed one line each in `memory/MEMORY.md`. Agents read the short index and open only what they need. Every note carries `as_of` / `last_verified` / `source`, and `baker doctor` flags stale, oversized, orphaned or broken notes.
 
 Linked notes already form a graph, and Obsidian's graph view shows it with no extra tooling. → [docs/memory.md](docs/memory.md)
+
+### Standalone memory retention
+
+Baker works without Bakery: agents retain ordinary Markdown notes, recover
+unfinished work, and switch tools locally. Use `baker memory list --json` to
+inventory project knowledge, `baker memory recall --query "topic" --json` to
+retrieve it, and `baker memory check` to check note health. Stale or incomplete
+notes are flagged and remain available as leads to verify.
+
+Team-first means project knowledge is portable and safe to commit, while
+personal handoffs and checkpoints remain local. Bakery will add collaboration;
+it is not required for local capture, retention, retrieval, or continuation.
+See [the standalone scope](docs/implementation-plan.md).
+
+The earlier review-lifecycle prototype is retained under `baker experimental
+crumb`; it is not part of the default memory workflow. Its evaluations and
+limitations are in [reviewed-memory.md](docs/reviewed-memory.md).
 
 ## Two layers: personal and project
 

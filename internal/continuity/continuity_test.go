@@ -1,11 +1,60 @@
 package continuity
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestBriefRespectsSourceAgentForCheckpointFallback(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("BAKER_HOME", t.TempDir())
+	t.Setenv("BAKER_USER_HOME", t.TempDir())
+	dir := filepath.Join(root, CheckpointDir)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	cp := Checkpoint{Time: time.Now(), Session: &Session{Agent: "codex", Messages: []Message{{Role: "user", Text: "UNRELATED_SOURCE_TASK"}}}}
+	b, _ := json.Marshal(cp)
+	if err := os.WriteFile(filepath.Join(dir, "checkpoint.json"), b, 0644); err != nil {
+		t.Fatal(err)
+	}
+	brief, err := Brief(root, "fixture", "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(brief, "UNRELATED_SOURCE_TASK") {
+		t.Fatal("--from claude used a Codex checkpoint")
+	}
+	brief, err = Brief(root, "fixture", "codex")
+	if err != nil || !strings.Contains(brief, "UNRELATED_SOURCE_TASK") {
+		t.Fatal("matching checkpoint not recovered")
+	}
+}
+
+func TestRapidCheckpointsDoNotOverwriteEachOther(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("BAKER_HOME", t.TempDir())
+	t.Setenv("BAKER_USER_HOME", t.TempDir())
+	_, first, err := Take(root, "claude", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, second, err := Take(root, "claude", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first == second {
+		t.Fatal("rapid checkpoints overwrote each other")
+	}
+	files, err := filepath.Glob(filepath.Join(root, CheckpointDir, "*.json"))
+	if err != nil || len(files) != 2 {
+		t.Fatal("both checkpoints must survive")
+	}
+}
 
 func TestRedact(t *testing.T) {
 	in := `key sk-ant-api03-abcdefghijklmnopqrstuv and STRIPE_SECRET=whsec_123456 and ghp_abcdefghijklmnopqrstuvwxyz123 and password: "hunter2"`

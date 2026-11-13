@@ -21,7 +21,7 @@ func Brief(root, name, from string) (string, error) {
 	cp := LatestCheckpoint(root)
 	// Prefer a checkpoint if it's newer than any transcript we can read
 	// (e.g. the previous agent's transcript format isn't supported).
-	if cp != nil && cp.Session != nil && (session == nil || cp.Time.After(session.Updated.Add(time.Minute))) {
+	if cp != nil && cp.Session != nil && (from == "" || cp.Session.Agent == from) && (session == nil || cp.Time.After(session.Updated.Add(time.Minute))) {
 		session = cp.Session
 	}
 	if session != nil {

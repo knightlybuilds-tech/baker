@@ -1,5 +1,6 @@
 /bin/
 *.test
+__pycache__/
 .DS_Store
 
 # Website for getbaker.sh / getbaker.app — local only for now

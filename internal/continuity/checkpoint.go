@@ -70,7 +70,7 @@ func Take(root, agent string, hook *HookInput) (*Checkpoint, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	path := filepath.Join(dir, cp.Time.Format("20060102-150405")+".json")
+	path := filepath.Join(dir, cp.Time.Format("20060102-150405.000000000")+".json")
 	if err := os.WriteFile(path, b, 0o644); err != nil {
 		return nil, "", err
 	}
