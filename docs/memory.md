@@ -1,5 +1,14 @@
 # Memory
 
+Local memory works without Bakery or approval. Use `baker memory list --json`
+to inventory notes, `baker memory recall --query "topic" --json` to retrieve
+matching notes, and `baker memory check` for index, link, and freshness checks.
+Recall flags missing or stale metadata and keeps those notes available as leads
+to verify. No account, network service, or experimental review record is needed.
+
+The earlier [review lifecycle prototype](reviewed-memory.md) is isolated under
+`baker experimental crumb` and is not part of the default note workflow.
+
 Project memory lives in `memory/` as small markdown notes. Any agent can read and write it, and humans can browse it in an editor or Obsidian.
 
 ## Layout

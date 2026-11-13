@@ -52,7 +52,9 @@ Codex, Cursor, Copilot, OpenCode, Windsurf, Amp, Zed and Cline read `AGENTS.md` 
 
 ## Install
 
-baker is a single Go binary.
+baker is a single Go binary. Download it for your OS from
+[Releases](https://github.com/knightlybuilds-tech/baker/releases) (Linux, macOS,
+Windows; amd64 and arm64), unpack it, and put `baker` on your PATH. Or with Go:
 
 ```bash
 go install github.com/knightlybuilds-tech/baker/cmd/baker@latest
@@ -100,6 +102,8 @@ Existing `CLAUDE.md` / `GEMINI.md` instructions are moved into `AGENTS.md`, neve
 | `baker init` | Add the AI layer to the current project (plan → confirm → apply) |
 | `baker sync` | Regenerate bridges, skills, MCP config, hooks and managed blocks. Your edits are protected (`--force` overrides, `--dry-run` previews) |
 | `baker doctor` | Check bridges, file sizes, legacy files, hooks and memory health |
+| `baker memory list / recall / check` | Discover, retrieve, and check ordinary local notes without an account or approval |
+| `baker bakery` | Browse this project's memory as cards, a list and a connected web on `127.0.0.1` (read-only, live-updating) |
 | `baker checkpoint` | Snapshot git state + latest transcript (run automatically by hooks) |
 | `baker handoff` | Print a resume brief (`--copy` to clipboard, `-o file`) |
 | `baker resume <agent>` | Launch another agent with the resume brief as its first prompt |
@@ -118,19 +122,52 @@ You're halfway through a task and Claude hits its usage limit:
 baker resume codex
 ```
 
-Codex starts with a brief built from three layers. Any one of them is enough to continue:
+Codex starts with a brief built from three complementary recovery layers:
 
 1. **`memory/hot.md`**, written by the agent after every finished step (Goal, Done, Next, Gotchas).
 2. **Checkpoints**, saved by a hook after every agent turn: branch, uncommitted changes, todo list, last messages.
 3. **Transcript recovery**: baker reads the previous agent's local transcript (Claude Code, Codex, Gemini CLI), including from other accounts' config folders.
 
-Everything stays on your machine, and secrets are redacted. → [docs/continuity.md](docs/continuity.md)
+Baker builds the brief locally and applies best-effort secret redaction. Passing
+it to a hosted agent sends its contents to that provider. → [docs/continuity.md](docs/continuity.md)
 
 ## Memory: small notes, not a giant file
 
 Memory is **atomic notes**: one idea per file, the title is the claim, under 200 words, linked with `[[wikilinks]]`, indexed one line each in `memory/MEMORY.md`. Agents read the short index and open only what they need. Every note carries `as_of` / `last_verified` / `source`, and `baker doctor` flags stale, oversized, orphaned or broken notes.
 
 Linked notes already form a graph, and Obsidian's graph view shows it with no extra tooling. → [docs/memory.md](docs/memory.md)
+
+### Standalone memory retention
+
+Baker works without Bakery: agents retain ordinary Markdown notes, recover
+unfinished work, and switch tools locally. Use `baker memory list --json` to
+inventory project knowledge, `baker memory recall --query "topic" --json` to
+retrieve it, and `baker memory check` to check note health. Stale or incomplete
+notes are flagged and remain available as leads to verify.
+
+Team-first means project knowledge is portable and safe to commit, while
+personal handoffs and checkpoints remain local. Bakery will add collaboration;
+it is not required for local capture, retention, retrieval, or continuation.
+See [the standalone scope](docs/implementation-plan.md).
+
+### See your memory: `baker bakery`
+
+```bash
+baker bakery            # opens http://127.0.0.1:4410/
+baker bakery --no-open --port 4500
+```
+
+A local, read-only Bakery view of `memory/`: cards, a list and a connected web
+built from your `[[links]]`, with `baker memory check` findings at the top and
+freshness flags on each note. It refreshes within a few seconds of a note
+changing. It binds to loopback only, never writes files, and doesn't show
+`hot.md`, checkpoints or transcripts. Review, branch and team screens belong to
+the future hosted Bakery and are marked as not yet available. See
+[docs/bakery.md](docs/bakery.md).
+
+The earlier review-lifecycle prototype is retained under `baker experimental
+crumb`; it is not part of the default memory workflow. Its evaluations and
+limitations are in [reviewed-memory.md](docs/reviewed-memory.md).
 
 ## Two layers: personal and project
 
@@ -181,11 +218,13 @@ Details, file paths and what's still unverified: [docs/agents.md](docs/agents.md
 The full design is in [docs/spec.md](docs/spec.md), and the research behind it is in [docs/research/](docs/research/landscape-report.md).
 
 ## Roadmap
+- [ ] `baker learn`: propose cited crumbs for an existing project from git history and (opt-in) past agent sessions, triaged in an inbox ([design](docs/learn.md))
 
 - [ ] `baker graph`: optional [graphify](https://github.com/safishamsi/graphify) code-graph adapter (designed in the spec)
 - [ ] Remote recipes: `--recipe github:user/repo`
 - [ ] More recipes: Next.js, Django, Rails, Go
-- [ ] Homebrew tap and prebuilt release binaries
+- [x] Prebuilt release binaries
+- [ ] Homebrew tap
 - [ ] Organization profiles for the vault (PARA, Johnny Decimal)
 
 ## Development
@@ -194,10 +233,19 @@ The full design is in [docs/spec.md](docs/spec.md), and the research behind it i
 make test     # go test ./...
 make build    # ./bin/baker
 make lint     # go vet + gofmt check
+make bakery-ui  # sync the Bakery UI from ../bakery-workspace/dist into internal/bakery/ui
 ```
 
-Code map: `cmd/baker` (entry) · `internal/cli` (commands) · `internal/scaffold` (plan/apply engine, build, doctor, global) · `internal/blocks` (managed regions) · `internal/recipe` · `internal/memory` (note checks) · `internal/continuity` (transcripts, checkpoints, handoff) · `internal/agents` (agent registry) · `assets/` (embedded core block, skills, recipes).
+Code map: `cmd/baker` (entry) · `internal/cli` (commands) · `internal/scaffold` (plan/apply engine, build, doctor, global) · `internal/blocks` (managed regions) · `internal/recipe` · `internal/memory` (note checks) · `internal/bakery` (local Bakery server + embedded UI) · `internal/continuity` (transcripts, checkpoints, handoff) · `internal/agents` (agent registry) · `assets/` (embedded core block, skills, recipes).
+
+## Releases
+
+Every merge to `main` runs the tests and publishes a release with binaries and
+checksums ([release.yml](.github/workflows/release.yml), [GoReleaser](.goreleaser.yaml)).
+The version is the next patch by default. Put `#minor` or `#major` in the merge
+commit message to bump further, or `#skip-release` to skip. The first release
+is `v0.1.0`.
 
 ## License
 
-To be decided before the first public release.
+[MIT](LICENSE)

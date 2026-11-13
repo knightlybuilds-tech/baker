@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f8f4e8" />
+    <meta
+      name="description"
+      content="A playful, interactive concept for Bakery: a shared table for team memory, branches, and thoughtful review."
+    />
+    <title>Bakery — The shared table</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=6" />
+    <script src="app.js?v=6" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the workspace</a>
+    <div class="concept-bar">
+      <span>Fresh out of the sketchbook.</span> Interactive concept · Sample workspace · Saved in this browser
+      <button id="reset-demo">Start a fresh batch ↺</button>
+    </div>
+    <header class="app-header">
+      <button class="wordmark" data-view="memory" aria-label="Bakery memory home">
+        <svg viewBox="0 0 35 31" aria-hidden="true">
+          <path d="M4 26V13C4 5 11 2 18 3c8-1 13 4 13 11v12c-8 3-18 3-27 0Z" />
+          <path d="m12 9 4 3m3-4 4 3m-5 9c1 2 4 2 5-1" /></svg
+        >bakery<span>.</span>
+      </button>
+      <div class="workspace-name">
+        <span class="workspace-symbol">n.</span><span>Northstar <small>team workspace</small></span
+        ><span class="private-label">private</span>
+      </div>
+      <label class="global-search"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10" cy="10" r="6.5" />
+          <path d="m15 15 5 5" /></svg
+        ><span class="sr-only">Search team memory</span
+        ><input id="global-search" type="search" placeholder="Find a crumb…" autocomplete="off" /><kbd
+          >/</kbd
+        ></label
+      ><button class="avatar my-avatar" data-view="team" aria-label="Alex Morgan, workspace owner">AM</button>
+    </header>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <nav aria-label="Workspace">
+          <span class="nav-label">THE SHARED TABLE</span
+          ><button class="nav-item" data-view="memory"><span data-icon="notes"></span>Memory</button
+          ><button class="nav-item" data-view="reviews">
+            <span data-icon="review"></span>Review queue
+            <span class="nav-count" id="review-count">3</span></button
+          ><button class="nav-item" data-view="branches"><span data-icon="branch"></span>Branches</button
+          ><button class="nav-item" data-view="activity"><span data-icon="activity"></span>Activity</button
+          ><span class="nav-label projects-label">YOUR PROJECTS</span
+          ><button class="nav-item project-link" data-project="Payments">
+            <span class="project-dot payments"></span>Payments</button
+          ><button class="nav-item project-link" data-project="Storefront">
+            <span class="project-dot storefront"></span>Storefront</button
+          ><button class="nav-item project-link" data-project="Platform">
+            <span class="project-dot platform"></span>Platform
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-illustration">
+            <img src="loaf.svg" width="65" height="69" alt="" />
+            <p>A good idea is better<br /><em>when it sticks around.</em></p>
+          </div>
+          <nav aria-label="Workspace settings">
+            <button class="nav-item" data-view="team"><span data-icon="team"></span>Team & access</button
+            ><button class="nav-item" data-view="connect">
+              <span data-icon="terminal"></span>Baker & your files</button
+            ><a
+              class="nav-item baker-docs"
+              href="https://baker-fresh-memory.chatgpt-for-3601.chatgpt.site/docs/"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><span data-icon="book"></span>The Baker notebook ↗</a
+            >
+          </nav>
+        </div>
+      </aside>
+      <main id="main"></main>
+    </div>
+    <dialog id="note-dialog" class="note-sheet" aria-label="Memory details">
+      <div id="note-content"></div>
+    </dialog>
+    <dialog id="composer-dialog" class="composer" aria-labelledby="composer-title">
+      <form id="crumb-form">
+        <header class="dialog-header">
+          <div>
+            <span class="eyebrow">A LITTLE SOMETHING WORTH KEEPING</span>
+            <h2 id="composer-title">Leave a crumb.</h2>
+          </div>
+          <button type="button" class="icon-button" data-close="composer-dialog" aria-label="Close new crumb">
+            ×
+          </button>
+        </header>
+        <p class="dialog-intro">One useful idea. Its source. A little context for the next person.</p>
+        <input type="hidden" name="editId" />
+        <div class="form-pair">
+          <label
+            >Project<select name="project">
+              <option>Payments</option>
+              <option>Storefront</option>
+              <option>Platform</option>
+            </select></label
+          ><label
+            >Kind<select name="kind">
+              <option>Decision</option>
+              <option>Lesson</option>
+              <option>Knowledge</option>
+            </select></label
+          >
+        </div>
+        <label
+          >The claim<input
+            name="title"
+            maxlength="140"
+            required
+            placeholder="Account codes must remain strings" /></label
+        ><label
+          >The useful context<textarea
+            name="body"
+            rows="5"
+            maxlength="3000"
+            required
+            placeholder="What did we learn, why, and when does it apply?"
+          ></textarea></label
+        ><label
+          >Source or evidence<input
+            name="source"
+            required
+            maxlength="240"
+            placeholder="A test path, commit, incident, or document" /></label
+        ><label
+          >Save to a branch<input
+            name="branch"
+            required
+            maxlength="70"
+            placeholder="notes/a-good-lesson"
+          /><small
+            >Keep the shared version as it is until the team reviews and merges this change.</small
+          ></label
+        >
+        <p class="form-error" id="crumb-error" role="alert"></p>
+        <footer class="dialog-footer">
+          <span>Private · Northstar</span>
+          <div>
+            <button type="button" class="button" data-close="composer-dialog">Cancel</button
+            ><button type="submit" class="button red">Save to branch ↗</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="branch-dialog" class="composer small-dialog" aria-labelledby="branch-title">
+      <form id="branch-form">
+        <header class="dialog-header">
+          <div>
+            <span class="eyebrow">ROOM FOR A NEW RECIPE</span>
+            <h2 id="branch-title">Make a branch.</h2>
+          </div>
+          <button type="button" class="icon-button" data-close="branch-dialog" aria-label="Close branch form">
+            ×
+          </button>
+        </header>
+        <p class="dialog-intro">A separate place to work out a change before it becomes shared knowledge.</p>
+        <label
+          >Branch name<input name="name" required maxlength="70" placeholder="notes/better-deploys" /></label
+        ><label
+          >Project<select name="project">
+            <option>Payments</option>
+            <option>Storefront</option>
+            <option>Platform</option>
+          </select></label
+        >
+        <p class="form-error" id="branch-error" role="alert"></p>
+        <footer class="dialog-footer">
+          <span>Starts from main</span><button class="button red" type="submit">Create branch ↗</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="invite-dialog" class="composer small-dialog" aria-labelledby="invite-title">
+      <form id="invite-form">
+        <header class="dialog-header">
+          <div>
+            <span class="eyebrow">PULL UP A CHAIR</span>
+            <h2 id="invite-title">Invite a teammate.</h2>
+          </div>
+          <button type="button" class="icon-button" data-close="invite-dialog" aria-label="Close invitation">
+            ×
+          </button>
+        </header>
+        <p class="dialog-intro">
+          Preview only. No email will be sent; this adds a sample invitation to this browser.
+        </p>
+        <label>Email<input name="email" required type="email" placeholder="teammate@example.com" /></label
+        ><label
+          >Role<select name="role">
+            <option>Contributor</option>
+            <option>Reviewer</option>
+          </select></label
+        >
+        <footer class="dialog-footer">
+          <span>Private workspace</span
+          ><button class="button red" type="submit">Preview invitation ↗</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="confirm-dialog" class="composer small-dialog" aria-labelledby="confirm-title">
+      <header class="dialog-header">
+        <h2 id="confirm-title">Start fresh?</h2>
+        <button class="icon-button" data-close="confirm-dialog" aria-label="Close reset confirmation">
+          ×
+        </button>
+      </header>
+      <p class="dialog-intro">Reset this sample workspace and its saved changes in this browser?</p>
+      <footer class="dialog-footer">
+        <button class="button" data-close="confirm-dialog">Keep my changes</button
+        ><button class="button red" id="confirm-reset">Start a fresh batch</button>
+      </footer>
+    </dialog>
+    <dialog id="local-howto-dialog" class="composer small-dialog" aria-labelledby="howto-title">
+      <header class="dialog-header">
+        <div>
+          <span class="eyebrow">BAKED IN YOUR FILES</span>
+          <h2 id="howto-title">Add a crumb.</h2>
+        </div>
+        <button class="icon-button" data-close="local-howto-dialog" aria-label="Close">×</button>
+      </header>
+      <p class="dialog-intro">
+        This local view only reads. Crumbs live as small Markdown files in <code>memory/</code>, so add one the
+        way your team already works:
+      </p>
+      <ol class="howto-steps">
+        <li><strong>Ask your agent.</strong> “Save that as a lesson in memory.” Baker’s instructions tell it how.</li>
+        <li>
+          <strong>Or write it yourself:</strong> one claim per file in <code>memory/decisions/</code>,
+          <code>lessons/</code> or <code>knowledge/</code>, with <code>type</code>, <code>as_of</code>,
+          <code>last_verified</code> and <code>source</code> frontmatter, and a line in
+          <code>memory/MEMORY.md</code>.
+        </li>
+        <li><strong>Commit it</strong> with your code so teammates’ agents find it too.</li>
+      </ol>
+      <p class="dialog-intro">This page notices changes in <code>memory/</code> within a few seconds.</p>
+      <footer class="dialog-footer">
+        <span>Check notes with <code>baker memory check</code></span>
+        <button class="button red" data-close="local-howto-dialog">Got it</button>
+      </footer>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
