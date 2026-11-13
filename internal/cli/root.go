@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/knightlybuilds-tech/baker/internal/config"
@@ -12,9 +13,6 @@ import (
 	"github.com/knightlybuilds-tech/baker/internal/scaffold"
 	"github.com/spf13/cobra"
 )
-
-// Version is set at build time with -ldflags "-X github.com/knightlybuilds-tech/baker/internal/cli.Version=v0.1.0".
-var Version = "dev"
 
 func Execute() error {
 	root := &cobra.Command{
@@ -28,7 +26,7 @@ sets up plain-markdown memory, shared skills, MCP config, and lets you
 continue a task in another agent or account when a session ends.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Version:       Version,
+		Version:       resolveVersion(Version, debug.ReadBuildInfo),
 	}
 	root.AddCommand(newCmd(), initCmd(), syncCmd(), doctorCmd(), globalCmd(),
 		checkpointCmd(), handoffCmd(), resumeCmd(), memoryCmd(), bakeryCmd(), experimentalCmd(), listCmd(), recipesCmd())
