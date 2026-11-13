@@ -216,6 +216,7 @@ Details, file paths and what's still unverified: [docs/agents.md](docs/agents.md
 The full design is in [docs/spec.md](docs/spec.md), and the research behind it is in [docs/research/](docs/research/landscape-report.md).
 
 ## Roadmap
+- [ ] `baker learn`: propose cited crumbs for an existing project from git history and (opt-in) past agent sessions, triaged in an inbox ([design](docs/learn.md))
 
 - [ ] `baker graph`: optional [graphify](https://github.com/safishamsi/graphify) code-graph adapter (designed in the spec)
 - [ ] Remote recipes: `--recipe github:user/repo`
