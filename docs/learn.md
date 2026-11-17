@@ -1,7 +1,8 @@
 # `baker learn` — design (not built)
 
-> Status: proposal, 2026-11-13. Nothing here is implemented. It records the
-> intended shape, the known holes, and the order to build it in.
+> Status: proposal, 2026-11-13. Step 1 (the `learn` skill) shipped on
+> 2026-11-17; the rest is not implemented. This records the intended shape,
+> the known holes, and the order to build it in.
 
 ## Goal
 
@@ -205,9 +206,10 @@ times.
 
 ## Build order
 
-1. **`learn` skill only.** A prompt devs trigger inside their own agent, writing
-   cited drafts to `memory/inbox/`. Almost no Go code, and it tells us quickly
-   whether the drafts are any good.
+1. **`learn` skill only.** ✓ Shipped (`assets/skills/learn`). Devs trigger it
+   inside their own agent. In this first version the chat is the inbox: the
+   agent proposes numbered, cited crumbs and saves only the ones the user keeps,
+   through `baker memory add`. No Go code beyond `memory add`.
 2. **Evidence harvest** in Go (`internal/learn`), with fixture repos and tests.
 3. **`baker learn`:** agent detection and chooser, per-agent read-only `Learn`
    adapters, validation and staging, cursor.

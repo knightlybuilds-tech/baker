@@ -138,3 +138,39 @@ func TestCodexNotifyHookIsValidTOML(t *testing.T) {
 		t.Fatalf("notify: %q", doc.Notify)
 	}
 }
+
+func TestClaudeNudgeHookInstalledAndRemovable(t *testing.T) {
+	t.Setenv("BAKER_HOME", t.TempDir())
+	t.Setenv("BAKER_USER_HOME", t.TempDir())
+	root := t.TempDir()
+	bake(t, root, false)
+	bake(t, root, false)
+	settings := readFile(t, root, ".claude/settings.json")
+	if n := strings.Count(settings, "baker nudge --agent claude"); n != 1 {
+		t.Fatalf("want one nudge hook after two builds, got %d:\n%s", n, settings)
+	}
+	if strings.Contains(readFile(t, root, ".gemini/settings.json"), "baker nudge") {
+		t.Error("only agents with a NudgeEvent get the nudge hook")
+	}
+	if !strings.Contains(readFile(t, root, ".gitignore"), ".baker/nudge/") {
+		t.Error(".baker/nudge/ should be gitignored")
+	}
+
+	proj, r, err := Prepare(root, "", []string{"claude", "codex", "gemini", "cursor"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	off := false
+	proj.Nudge = &off
+	p := NewPlan(root, false)
+	if err := Build(p, proj, r); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Apply(); err != nil {
+		t.Fatal(err)
+	}
+	settings = readFile(t, root, ".claude/settings.json")
+	if strings.Contains(settings, "baker nudge") || !strings.Contains(settings, "baker checkpoint --agent claude") {
+		t.Errorf("nudge = false should remove only the nudge hook:\n%s", settings)
+	}
+}

@@ -32,7 +32,7 @@ shop/
 ├── AGENTS.md              ← the one file you edit: your notes + stack + memory rules
 ├── CLAUDE.md              ← bridge: @AGENTS.md            (generated)
 ├── GEMINI.md              ← bridge: @AGENTS.md            (generated)
-├── .agents/skills/        ← session-close, consolidate, ingest + stack skills
+├── .agents/skills/        ← session-close, consolidate, ingest, learn + stack skills
 ├── .claude/skills/        ← mirror for Claude Code        (generated)
 ├── .claude/settings.json  ← checkpoint hook               (generated)
 ├── .gemini/settings.json  ← checkpoint hook + MCP         (generated)
@@ -103,6 +103,7 @@ Existing `CLAUDE.md` / `GEMINI.md` instructions are moved into `AGENTS.md`, neve
 | `baker sync` | Regenerate bridges, skills, MCP config, hooks and managed blocks. Your edits are protected (`--force` overrides, `--dry-run` previews) |
 | `baker doctor` | Check bridges, file sizes, legacy files, hooks and memory health |
 | `baker memory list / recall / check` | Discover, retrieve, and check ordinary local notes without an account or approval |
+| `baker memory add` | Save one crumb: validated (claim, source, size, duplicates, secrets) and indexed in `MEMORY.md`. Agents use this |
 | `baker bakery` | Browse this project's memory as cards, a list and a connected web on `127.0.0.1` (read-only, live-updating) |
 | `baker checkpoint` | Snapshot git state + latest transcript (run automatically by hooks) |
 | `baker handoff` | Print a resume brief (`--copy` to clipboard, `-o file`) |
@@ -149,6 +150,25 @@ Team-first means project knowledge is portable and safe to commit, while
 personal handoffs and checkpoints remain local. Bakery will add collaboration;
 it is not required for local capture, retention, retrieval, or continuation.
 See [the standalone scope](docs/implementation-plan.md).
+
+### Saving crumbs
+
+Agents save crumbs as they work, not just at the end: the memory block in
+`AGENTS.md` lists when (a decision and its reason, a bug's cause, a project
+fact the code doesn't show, a correction from you) and how:
+
+```bash
+baker memory add --kind lesson --title "Retry payments only on HTTP 429 and 503" \
+  --body "Other failures need a separate investigation." --source "billing/retry.go"
+```
+
+It refuses notes without a source, duplicate slugs and anything that looks
+like a secret, and indexes the note in `MEMORY.md`. In Claude Code, a Stop hook
+(`baker nudge`) asks the agent once, after a stretch of edits with no crumb
+saved, whether anything is worth keeping. Turn it off with `nudge = false` in
+`baker.toml`. To seed memory in a project with history, ask your agent to use
+the `learn` skill: it proposes cited crumbs from git history, comments and docs,
+and saves only the ones you keep.
 
 ### See your memory: `baker bakery`
 

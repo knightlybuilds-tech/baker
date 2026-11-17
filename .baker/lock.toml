@@ -2,15 +2,17 @@ mcp = []
 
 [files]
 '.agents/skills/consolidate/SKILL.md' = 'd7fa1f5226e3c4b6'
-'.agents/skills/ingest/SKILL.md' = '8dc82cafa19624e1'
-'.agents/skills/session-close/SKILL.md' = 'c3499b942d44326a'
+'.agents/skills/ingest/SKILL.md' = '7de1a739fd7c719a'
+'.agents/skills/learn/SKILL.md' = '9bd62b6972803fc9'
+'.agents/skills/session-close/SKILL.md' = 'dd7067f787eefaa5'
 '.claude/skills/consolidate/SKILL.md' = 'd7fa1f5226e3c4b6'
-'.claude/skills/ingest/SKILL.md' = '8dc82cafa19624e1'
-'.claude/skills/session-close/SKILL.md' = 'c3499b942d44326a'
+'.claude/skills/ingest/SKILL.md' = '7de1a739fd7c719a'
+'.claude/skills/learn/SKILL.md' = '9bd62b6972803fc9'
+'.claude/skills/session-close/SKILL.md' = 'dd7067f787eefaa5'
 
 [blocks]
-'.gitignore#baker' = '71a28e7478f1b3d2'
-'AGENTS.md#core' = '76a8f7b20a9072c1'
+'.gitignore#baker' = '56188b803f562cf6'
+'AGENTS.md#core' = '021c5d1659a4eb64'
 'AGENTS.md#recipe:generic' = 'e9744498963b7271'
 'CLAUDE.md#bridge' = '918b1c90559355ef'
 'GEMINI.md#bridge' = '918b1c90559355ef'

@@ -7,8 +7,9 @@ __pycache__/
 # Website for getbaker.sh / getbaker.app — local only for now
 /website/
 
-# baker:begin baker@1
+# baker:begin baker@2
 memory/hot.md
 .baker/checkpoints/
 .baker/graph/
+.baker/nudge/
 # baker:end baker

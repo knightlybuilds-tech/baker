@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "command": "command -v baker >/dev/null 2>&1 && baker checkpoint --agent gemini --quiet || true",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreCompress": [
+      {
+        "hooks": [
+          {
+            "command": "command -v baker >/dev/null 2>&1 && baker checkpoint --agent gemini --quiet || true",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

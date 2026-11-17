@@ -99,6 +99,13 @@ func (p *Plan) skip(path, why string) {
 	p.skipped[path] = why
 }
 
+// Write sets a user-owned file's full content for a deliberate edit the user
+// asked for (e.g. `baker memory add`). It bypasses the lock: these files are
+// not generated, so there is no "edited since generation" to protect.
+func (p *Plan) Write(path, content string) {
+	p.set(path, content, "")
+}
+
 // Once writes a file only if it doesn't exist. The user owns it afterwards.
 func (p *Plan) Once(path, content string) {
 	if _, ok := p.Read(path); !ok {

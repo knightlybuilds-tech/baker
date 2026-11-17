@@ -31,10 +31,10 @@ continue a task in another agent or account when a session ends.`,
 		Version:       Version,
 	}
 	root.AddCommand(newCmd(), initCmd(), syncCmd(), doctorCmd(), globalCmd(),
-		checkpointCmd(), handoffCmd(), resumeCmd(), memoryCmd(), bakeryCmd(), experimentalCmd(), listCmd(), recipesCmd())
+		checkpointCmd(), handoffCmd(), resumeCmd(), memoryCmd(), bakeryCmd(), nudgeCmd(), experimentalCmd(), listCmd(), recipesCmd())
 	// After a plain `go install`, the first run is usually by full path:
-	// tell the user how to put baker on PATH. Hooks (checkpoint) stay silent.
-	if len(os.Args) < 2 || os.Args[1] != "checkpoint" {
+	// tell the user how to put baker on PATH. Hooks (checkpoint, nudge) stay silent.
+	if len(os.Args) < 2 || (os.Args[1] != "checkpoint" && os.Args[1] != "nudge") {
 		printPathHint(os.Stderr)
 	}
 	return root.Execute()

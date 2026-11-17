@@ -10,6 +10,7 @@ name = 'shop'
 recipe = 'laravel'
 recipe_version = 1
 agents = ['claude', 'codex', 'gemini', 'cursor', 'copilot', 'opencode']
+# nudge = false               # turn off the Claude Code "save crumbs?" Stop hook
 
 [facts]                       # detected from project files; refreshed on every sync
 laravel_version = '13'
@@ -25,6 +26,7 @@ args = ['artisan', 'boost:mcp']
 - **Change agents:** edit `agents`, run `baker sync`. All ids: `baker recipes`.
 - **Add an MCP server:** add an `[[mcp]]` table, run `baker sync`. It's written to every enabled agent's MCP file.
 - **Remove an MCP server:** delete its table and run `baker sync`. baker removes it from the files it manages.
+- **Crumb nudge:** on by default. For Claude Code, `baker sync` adds a second Stop hook, `baker nudge`, that asks the agent to save crumbs after a stretch of work with none saved. Set `nudge = false` and run `baker sync` to remove it (or set `BAKER_NO_NUDGE=1` for one shell).
 
 ## Lock: `.baker/lock.toml`
 
@@ -75,3 +77,4 @@ gemini = ['~/.gemini']
 |---|---|
 | `BAKER_HOME` | Use another folder instead of `~/.baker` |
 | `BAKER_USER_HOME` | Treat another folder as your home (agents' config dirs, transcripts). Used in tests. |
+| `BAKER_NO_NUDGE` | Any value silences `baker nudge` (the Claude Code "save crumbs?" hook) |

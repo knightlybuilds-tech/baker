@@ -23,11 +23,12 @@ Do these steps in order. Keep every write short.
    - decisions made (link the note if you wrote one)
    ```
 
-3. **Propose lessons, don't just write them.** If something was learned the hard way, or a decision was made, list the proposed atomic notes (title as a full-sentence claim + one-line reason) and ask the user which to keep. For each approved one:
-   - create `memory/lessons/<slug>.md`, `memory/decisions/<slug>.md` or `memory/knowledge/<slug>.md`
-   - frontmatter: `type`, `scope: project`, `tags`, `as_of`, `last_verified` (today), `source` (this session), `confidence`
-   - body under 200 words; link related notes with `[[slug]]`
-   - add one line to `memory/MEMORY.md` under the right heading
+3. **Save the crumbs this session earned.** Look back for decisions (and why), lessons learned the hard way, project facts the code doesn't show, and corrections from the user. Skip anything already saved, obvious from the code, or only about task progress. For each one:
+   ```
+   baker memory add --kind <decision|lesson|knowledge> --title "<the claim as one sentence>" \
+     --body "<detail and why it matters, under 200 words>" --source "session <YYYY-MM-DD>" [--link <slug>]
+   ```
+   Without Baker, write the note by hand (one claim per file in `memory/<kind>s/`, frontmatter `type`, `as_of`, `last_verified`, `source`, a line in `memory/MEMORY.md`). Ordinary notes need no approval; list what you saved in one line. If nothing qualifies, say so.
 
 4. Tell the user in one line that the handoff is written and they can continue with any agent (`baker resume <agent>`).
 

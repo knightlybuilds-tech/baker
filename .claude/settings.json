@@ -18,6 +18,14 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "command -v baker >/dev/null 2>&1 && baker nudge --agent claude || true",
+            "type": "command"
+          }
+        ]
       }
     ]
   }

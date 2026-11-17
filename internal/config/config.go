@@ -37,6 +37,9 @@ type Project struct {
 	Agents        []string          `toml:"agents"`
 	Facts         map[string]string `toml:"facts,omitempty"`
 	MCP           []MCPServer       `toml:"mcp,omitempty"`
+	// Nudge asks the agent to save crumbs when a session did work but saved
+	// none (Claude Code Stop hook). Default on; set nudge = false to turn it off.
+	Nudge *bool `toml:"nudge,omitempty"`
 }
 
 const ProjectFile = "baker.toml"

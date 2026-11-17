@@ -62,6 +62,7 @@ func memoryCmd() *cobra.Command {
 		}
 		return nil
 	}})
+	cmd.AddCommand(memoryAddCmd())
 	return cmd
 }
 

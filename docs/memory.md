@@ -73,15 +73,57 @@ When an index section grows past ~30 lines, the `consolidate` skill proposes a h
 | `last_verified` older than 90 days | warning |
 | `[[link]]` to a note that doesn't exist | warning |
 
+## Saving a crumb: `baker memory add`
+
+```bash
+baker memory add --kind decision \
+  --title "Account codes must remain strings" \
+  --body "007 and 7 are different accounts; exports must keep leading zeros." \
+  --source "tests/export_test.go" --tags billing --link money-in-minor-units
+```
+
+| Flag | |
+|---|---|
+| `--kind` | `decision`, `lesson` or `knowledge` (required) |
+| `--title` | the claim as one sentence; becomes the slug (required) |
+| `--body` / `--body-file <path or ->` | detail and why it matters; warns over 200 words, refuses over 400 |
+| `--source` | file, commit, issue, doc or `session YYYY-MM-DD` (required) |
+| `--tags`, `--link` | tags; related note slugs (written as `[[slug]]`) |
+| `--as-of`, `--confidence` | date the fact describes (default today); `high`/`medium`/`low` (default medium) |
+| `--hook` | the short phrase after the `MEMORY.md` link (default: the body's first sentence) |
+| `--dry-run`, `--json` | validate without writing; machine-readable output |
+
+It refuses duplicate slugs and anything that looks like a secret, warns about
+near-duplicate titles and links to notes that don't exist, writes the file with
+full frontmatter, and adds the index line under the right heading. Ordinary
+notes need no approval.
+
+## Getting agents to save
+
+Left to "the end of the session", agents often save nothing. So:
+
+- The `AGENTS.md` memory block tells agents to save **when it happens**: a
+  decision and its reason, a bug's cause or a trap, a project fact the code
+  doesn't show, a correction from the user.
+- **Claude Code** also gets a Stop hook, `baker nudge`. After a session edits 3+
+  files with no crumb saved (and again after every 8 more), it blocks the stop
+  once with a reason asking the agent to save crumbs or reply "No new crumbs."
+  It never fires while a previous nudge is being answered (`stop_hook_active`),
+  keeps its per-session state in `.baker/nudge/` (gitignored), and never fails.
+  Turn it off with `nudge = false` in `baker.toml` and `baker sync`.
+- Codex and Gemini have no equivalent hook reply yet; they rely on the
+  instructions and the `session-close` skill.
+
 ## Skills that maintain memory
 
 | Skill | Use it when |
 |---|---|
-| `session-close` | Ending a session or switching agents: updates hot.md, writes the daily log, proposes lessons |
+| `session-close` | Ending a session or switching agents: updates hot.md, writes the daily log, saves crumbs the session earned |
 | `consolidate` | Weekly cleanup: merge duplicates, re-verify stale notes, build hubs, propose promotions |
 | `ingest` | Turning a doc, URL or PDF into notes with sources |
+| `learn` | Seeding memory in a project with history: proposes cited crumbs from git, comments and docs (and past agent sessions if you agree), saves the ones you keep |
 
-Agents **propose** notes and promotions, and you approve them. A lesson becomes a rule in `AGENTS.md`, or moves to `~/.baker/memory/` (global), only with your OK.
+Agents save ordinary notes directly. Merges, deletions and promotions are proposed, and you approve them. A lesson becomes a rule in `AGENTS.md`, or moves to `~/.baker/memory/` (global), only with your OK.
 
 ## Global memory
 

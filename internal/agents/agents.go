@@ -49,6 +49,9 @@ type Agent struct {
 	// on each of HookEvents ({"hooks": {event: [{"hooks": [{type, command}]}]}}).
 	HooksFile  string
 	HookEvents []string
+	// NudgeEvent: hook event that runs `baker nudge`, whose JSON reply can ask
+	// the agent to keep going and save crumbs. Empty if the tool can't.
+	NudgeEvent string
 
 	// Launch builds the command line that starts the tool with a first prompt.
 	Launch func(prompt string) []string
@@ -61,7 +64,7 @@ var all = []Agent{
 		SkillsDir: ".claude/skills",
 		MCPFile:   ".mcp.json", MCPFormat: MCPServers,
 		GlobalFile: ".claude/CLAUDE.md", GlobalSkillsDir: ".claude/skills",
-		HooksFile: ".claude/settings.json", HookEvents: []string{"Stop", "PreCompact"},
+		HooksFile: ".claude/settings.json", HookEvents: []string{"Stop", "PreCompact"}, NudgeEvent: "Stop",
 		Launch: func(p string) []string { return []string{"claude", p} },
 	},
 	{
